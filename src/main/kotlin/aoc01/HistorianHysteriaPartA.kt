@@ -5,10 +5,10 @@ import kotlin.math.abs
 
 fun main() {
     val inputFile = File("inputs/aoc01/lists.txt")
-    val (inputA, inputB) = readInput(inputFile)
+    val (inputA, inputB) = readInputLists(inputFile)
 
-    val sortedA = inputA.sorted()
-    val sortedB = inputB.sorted()
+    val sortedA: List<Int> = inputA.sorted()
+    val sortedB: List<Int> = inputB.sorted()
 
     val sumOfDifferences = sortedA
         .zip(sortedB)

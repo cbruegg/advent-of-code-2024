@@ -4,7 +4,7 @@ import java.io.File
 
 fun main() {
     val inputFile = File("inputs/aoc01/lists.txt")
-    val (inputA, inputB) = readInput(inputFile)
+    val (inputA: List<Int>, inputB: List<Int>) = readInputLists(inputFile)
 
     val numberToFrequencyInB = inputB
         .groupBy { number -> number }
