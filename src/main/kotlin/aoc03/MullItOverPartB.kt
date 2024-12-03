@@ -8,7 +8,7 @@ fun main() {
     // Delete everything between don't and do (or end of line = $)
     // .*? eats everything between these markers non-greedily
     val memoryWithoutDisabledSections = memory.replace(
-        Regex("""don't\(\).*?(${'$'}|do\(\))"""),
+        Regex("""don't\(\).*?($|do\(\))"""),
         ""
     )
 
