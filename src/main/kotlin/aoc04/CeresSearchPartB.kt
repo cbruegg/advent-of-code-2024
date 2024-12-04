@@ -31,33 +31,29 @@ fun crossXmasScan(lines: List<String>, width: Int, height: Int): Int {
     for (y in 0..<height) {
         for (x in 0..<width) {
             // MAS - MAS
-            if (x + 2 < width && y + 2 < height &&
-                lines[y][x] == 'M' && lines[y + 1][x + 1] == 'A' && lines[y + 2][x + 2] == 'S' &&
-                lines[y + 2][x] == 'M' && lines[y + 1][x + 1] == 'A' && lines[y][x + 2] == 'S'
+            if (lines.matches(x..x + 2, y..y + 2, "MAS") &&
+                lines.matches(x..x + 2, (y..y + 2).reversed(), "MAS")
             ) {
                 counter++
             }
 
             // MAS - SAM
-            if (x + 2 < width && y + 2 < height &&
-                lines[y][x] == 'M' && lines[y + 1][x + 1] == 'A' && lines[y + 2][x + 2] == 'S' &&
-                lines[y + 2][x] == 'S' && lines[y + 1][x + 1] == 'A' && lines[y][x + 2] == 'M'
+            if (lines.matches(x..x + 2, y..y + 2, "MAS") &&
+                lines.matches(x..x + 2, (y..y + 2).reversed(), "SAM")
             ) {
                 counter++
             }
 
             // SAM - MAS
-            if (x + 2 < width && y + 2 < height &&
-                lines[y][x] == 'S' && lines[y + 1][x + 1] == 'A' && lines[y + 2][x + 2] == 'M' &&
-                lines[y + 2][x] == 'M' && lines[y + 1][x + 1] == 'A' && lines[y][x + 2] == 'S'
+            if (lines.matches(x..x + 2, y..y + 2, "SAM") &&
+                lines.matches(x..x + 2, (y..y + 2).reversed(), "MAS")
             ) {
                 counter++
             }
 
             // SAM - SAM
-            if (x + 2 < width && y + 2 < height &&
-                lines[y][x] == 'S' && lines[y + 1][x + 1] == 'A' && lines[y + 2][x + 2] == 'M' &&
-                lines[y + 2][x] == 'S' && lines[y + 1][x + 1] == 'A' && lines[y][x + 2] == 'M'
+            if (lines.matches(x..x + 2, y..y + 2, "SAM") &&
+                lines.matches(x..x + 2, (y..y + 2).reversed(), "SAM")
             ) {
                 counter++
             }

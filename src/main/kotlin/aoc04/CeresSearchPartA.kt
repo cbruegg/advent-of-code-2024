@@ -24,31 +24,22 @@ fun xmasScan(lines: List<String>, width: Int, height: Int): Int {
             }
 
             // vertical
-            if (y + 3 < height &&
-                (lines[y][x] == 'X' && lines[y + 1][x] == 'M' &&
-                        lines[y + 2][x] == 'A' && lines[y + 3][x] == 'S' ||
-                        lines[y][x] == 'S' && lines[y + 1][x] == 'A' &&
-                        lines[y + 2][x] == 'M' && lines[y + 3][x] == 'X')
+            if (lines.matches(listOf(x, x, x, x), y..y + 3, "XMAS") ||
+                lines.matches(listOf(x, x, x, x), y..y + 3, "SAMX")
             ) {
                 counter++
             }
 
             // diagonal (top-left to bottom-right)
-            if (x + 3 < width && y + 3 < height &&
-                (lines[y][x] == 'X' && lines[y + 1][x + 1] == 'M' &&
-                        lines[y + 2][x + 2] == 'A' && lines[y + 3][x + 3] == 'S' ||
-                        lines[y][x] == 'S' && lines[y + 1][x + 1] == 'A' &&
-                        lines[y + 2][x + 2] == 'M' && lines[y + 3][x + 3] == 'X')
+            if (lines.matches(x..x + 3, y..y + 3, "XMAS") ||
+                lines.matches(x..x + 3, y..y + 3, "SAMX")
             ) {
                 counter++
             }
 
             // diagonal (top-right to bottom-left)
-            if (x - 3 >= 0 && y + 3 < height &&
-                (lines[y][x] == 'X' && lines[y + 1][x - 1] == 'M' &&
-                        lines[y + 2][x - 2] == 'A' && lines[y + 3][x - 3] == 'S' ||
-                        lines[y][x] == 'S' && lines[y + 1][x - 1] == 'A' &&
-                        lines[y + 2][x - 2] == 'M' && lines[y + 3][x - 3] == 'X')
+            if (lines.matches((x - 3..x).reversed(), y..y + 3, "XMAS") ||
+                lines.matches((x - 3..x).reversed(), y..y + 3, "SAMX")
             ) {
                 counter++
             }
