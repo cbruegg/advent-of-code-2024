@@ -1,18 +1,10 @@
 package aoc04
 
+import java.io.File
+
 fun main() {
-    val lines = """
-        MMMSXXMASM
-        MSAMXMSMSA
-        AMXSXMAAMM
-        MSAMASMSMX
-        XMASAMXAMM
-        XXAMMXXAMA
-        SMSMSASXSS
-        SAXAMASAAA
-        MAMMMXMMMM
-        MXMXAXMASX
-    """.trimIndent().split("\n")
+    val inputFile = File("inputs/aoc04/input.txt")
+    val lines = inputFile.readLines()
 
     val width = lines[0].length
     val height = lines.size
