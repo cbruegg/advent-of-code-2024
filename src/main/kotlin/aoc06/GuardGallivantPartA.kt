@@ -1,20 +1,9 @@
 package aoc06
 
-fun main() {
-    val input = """
-        ....#.....
-        .........#
-        ..........
-        ..#.......
-        .......#..
-        ..........
-        .#..^.....
-        ........#.
-        #.........
-        ......#...
-    """.trimIndent()
+import java.io.File
 
-    val lines = input.lines()
+fun main() {
+    val lines = File("inputs/aoc06/input.txt").readLines()
 
     val width = lines[0].length
     val height = lines.size
