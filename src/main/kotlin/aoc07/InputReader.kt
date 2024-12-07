@@ -13,11 +13,12 @@ data class Equation(
 )
 
 enum class Operator {
-    Add, Mul
+    Add, Mul, Concat
 }
 
 fun Operator.evaluate(a: Long, b: Long): Long =
     when (this) {
         Operator.Add -> a + b
         Operator.Mul -> a * b
+        Operator.Concat -> (a.toString() + b.toString()).toLong()
     }
