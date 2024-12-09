@@ -2,8 +2,6 @@ package aoc09
 
 import java.io.File
 
-// -1 represents free space
-typealias DiskMap = IntArray
 
 fun main() {
     val input = File("inputs/aoc09/diskmap.txt").readText().trim()
@@ -16,16 +14,6 @@ fun main() {
 
     val checksum = checksum(optimizedDiskMap)
     println("checksum=$checksum")
-}
-
-fun checksum(diskMap: DiskMap): Long {
-    var sum = 0L
-    for ((idx, fileId) in diskMap.withIndex()) {
-        if (fileId != -1) {
-            sum += fileId * idx
-        }
-    }
-    return sum
 }
 
 fun optimizeSpaceUsage(originalDiskMap: DiskMap): DiskMap {
@@ -44,22 +32,3 @@ fun optimizeSpaceUsage(originalDiskMap: DiskMap): DiskMap {
     }
     return diskMap
 }
-
-fun expandDiskMap(input: String): DiskMap =
-    buildList {
-        for ((idx, blockLengthStr) in input.withIndex()) {
-            val blockLength = blockLengthStr.digitToInt()
-            if (idx % 2 == 0) {
-                // File
-                val fileId = idx / 2
-                repeat(blockLength) {
-                    add(fileId)
-                }
-            } else {
-                // Free space
-                repeat(blockLength) {
-                    add(-1)
-                }
-            }
-        }
-    }.toIntArray()
