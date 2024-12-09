@@ -16,19 +16,34 @@ fun main() {
     println("checksumV2=$checksum")
 }
 
+data class FileEntry(val id: Int, val start: Int, val end: Int) {
+    val size get() = end - start
+}
+
 fun optimizeSpaceUsageV2(originalDiskMap: DiskMap): DiskMap {
-    data class File(val id: Int, val start: Int, val end: Int) {
-        val size get() = end - start
+    val files = findFiles(originalDiskMap)
+
+    val diskMap = originalDiskMap.copyOf()
+    for (file in files.reversed()) {
+        val freeSlotIdx = diskMap.indexOfRepeatedEntry(-1, repetitions = file.size)
+        if (freeSlotIdx != -1 && freeSlotIdx < file.start) {
+            diskMap.swap(freeSlotIdx, file.start, file.size)
+//            println(diskMap.contentToString())
+        }
     }
 
-    val files = mutableListOf<File>()
+    return diskMap
+}
+
+private fun findFiles(originalDiskMap: DiskMap): MutableList<FileEntry> {
+    val files = mutableListOf<FileEntry>()
     var lastId: Int? = null
     var start = -1
     for ((i, fileId) in originalDiskMap.withIndex()) {
         if (fileId == -1) {
             if (lastId != null) {
                 // This is the end of a file, ended by free space
-                files += File(lastId, start, end = i)
+                files += FileEntry(lastId, start, end = i)
                 lastId = null
                 start = -1
             } else {
@@ -41,7 +56,7 @@ fun optimizeSpaceUsageV2(originalDiskMap: DiskMap): DiskMap {
                 lastId = fileId
             } else if (lastId != fileId) {
                 // We last read another file and are now seeing a new one
-                files += File(lastId, start, end = i)
+                files += FileEntry(lastId, start, end = i)
                 start = i
                 lastId = fileId
             }
@@ -49,19 +64,9 @@ fun optimizeSpaceUsageV2(originalDiskMap: DiskMap): DiskMap {
     }
     if (lastId != null) {
         // This is the end of a file, ended by end of disk
-        files += File(lastId, start, end = originalDiskMap.size)
+        files += FileEntry(lastId, start, end = originalDiskMap.size)
     }
-
-    val diskMap = originalDiskMap.copyOf()
-    for (file in files.reversed()) {
-        val freeSlotIdx = diskMap.indexOfRepeatedEntry(-1, repetitions = file.size)
-        if (freeSlotIdx != -1 && freeSlotIdx < file.start) {
-            diskMap.swap(freeSlotIdx, file.start, file.size)
-//            println(diskMap.contentToString())
-        }
-    }
-
-    return diskMap
+    return files
 }
 
 fun IntArray.indexOfRepeatedEntry(entry: Int, repetitions: Int): Int {
