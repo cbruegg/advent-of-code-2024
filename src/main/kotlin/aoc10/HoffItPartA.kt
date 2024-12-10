@@ -1,17 +1,9 @@
 package aoc10
 
+import java.io.File
+
 fun main() {
-    val input = """
-        89010123
-        78121874
-        87430965
-        96549874
-        45678903
-        32019012
-        01329801
-        10456732
-    """.trimIndent().lines()
-    //  val input = File("inputs/aoc10/map.txt").readLines()
+    val input = File("inputs/aoc10/map.txt").readLines()
 
     val map: List<IntArray> = input.map { line -> line.map { char -> char.digitToInt() }.toIntArray() }
     val height = map.size
