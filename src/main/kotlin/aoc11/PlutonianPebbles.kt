@@ -1,10 +1,11 @@
 package aoc11
 
+import java.io.File
 import kotlin.math.log10
 import kotlin.math.pow
 
 fun main() {
-    val input = "125 17"
+    val input = File("inputs/aoc11/input.txt").readText().trim()
 
     var state: List<Long> = input.split(' ').map { it.toLong() }
     println(state)
