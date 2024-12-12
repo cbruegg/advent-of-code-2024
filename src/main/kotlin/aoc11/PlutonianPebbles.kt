@@ -7,11 +7,12 @@ import kotlin.math.pow
 fun main() {
     val input = File("inputs/aoc11/input.txt").readText().trim()
 
-    var state: List<Long> = input.split(' ').map { it.toLong() }
+    var state = input.split(' ').map { it.toLong() }.toLongList()
     println(state)
-    repeat(25) {
-        val nextState = ArrayList<Long>(/* initialCapacity = */ (state.size * 1.5).toInt())
-        for (n in state) {
+    repeat(75) { i ->
+        println("Iteration $i: ${state.size} elements")
+        val nextState = LongList(initialCapacity = (state.size * 1.5).toInt())
+        state.forEach { n ->
             val numOfDigitsInBase10 = n.numOfDigitsInBase10
             when {
                 n == 0L -> {
@@ -36,6 +37,34 @@ fun main() {
         // println(state)
     }
     println(state.size)
+}
+
+class LongList(initialCapacity: Int) {
+    private var arr = LongArray(initialCapacity)
+    var size = 0
+        private set
+
+    operator fun plusAssign(l: Long) {
+        if (size == arr.size) {
+            arr = arr.copyOf((size * 1.5).toInt())
+        }
+
+        arr[size++] = l
+    }
+
+    fun forEach(consumer: (Long) -> Unit) {
+        for (i in 0..<size) {
+            consumer(arr[i])
+        }
+    }
+
+    override fun toString() = arr.contentToString()
+}
+
+fun List<Long>.toLongList(): LongList {
+    val longList = LongList(size)
+    forEach { longList += it }
+    return longList
 }
 
 private val Long.numOfDigitsInBase10 get() = log10(this.toDouble()).toInt() + 1
