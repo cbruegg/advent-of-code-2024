@@ -41,4 +41,4 @@ fun main() {
     println("totalFencePrice=$totalFencePrice")
 }
 
-private fun Region.computeFencePrice() = area * computePerimeter()
+private fun Region.computeFencePrice(): Int = area * computeNumberOfSides()
