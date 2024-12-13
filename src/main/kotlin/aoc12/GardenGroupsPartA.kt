@@ -1,18 +1,9 @@
 package aoc12
 
+import java.io.File
+
 fun main() {
-    val map = """
-        RRRRIICCFF
-        RRRRIICCCF
-        VVRRRCCFFF
-        VVRCCCJFFF
-        VVVVCJJCFE
-        VVIVCCJJEE
-        VVIIICJJEE
-        MIIIIIJJEE
-        MIIISIJEEE
-        MMMISSJEEE
-    """.trimIndent().lines()
+    val map = File("inputs/aoc12/map.txt").readLines()
 
     val height = map.size
     val width = map[0].length
