@@ -71,7 +71,7 @@ data class Region(val symbol: Char, val coordinates: Set<Coordinate>) {
                     visit(x - 1, y, side, connectedFenceParts)
                     visit(x, y + 1, side, connectedFenceParts)
                     visit(x, y - 1, side, connectedFenceParts)
-                } // else we already visited this plot
+                } // else we already visited this fence part
             }
         }
 
