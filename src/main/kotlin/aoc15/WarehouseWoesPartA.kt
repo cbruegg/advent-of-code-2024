@@ -19,12 +19,12 @@ fun main() {
     println("sumOfGpsCoordinates=$sumOfGpsCoordinates")
 }
 
-fun printGameState(gameState: List<String>) {
+private fun printGameState(gameState: List<String>) {
     gameState.forEach { println(it) }
     println()
 }
 
-fun findGpsCoordinates(gameState: List<String>): Sequence<Int> =
+private fun findGpsCoordinates(gameState: List<String>): Sequence<Int> =
     sequence {
         for ((y, line) in gameState.withIndex()) {
             for ((x, char) in line.withIndex()) {
@@ -35,7 +35,7 @@ fun findGpsCoordinates(gameState: List<String>): Sequence<Int> =
         }
     }
 
-fun advanceGameState(gameState: List<String>, move: Char): List<String> {
+private fun advanceGameState(gameState: List<String>, move: Char): List<String> {
     val (robotX, robotY) = gameState
         .withIndex()
         .map { (y, line) -> Coordinate(line.indexOf('@'), y) }
@@ -69,16 +69,11 @@ fun advanceGameState(gameState: List<String>, move: Char): List<String> {
     return nextGameState
 }
 
-fun Coordinate.moveBy(vecX: Int, vecY: Int): Coordinate =
-    Coordinate(x + vecX, y + vecY)
-
-private fun String.replaceIndex(i: Int, c: Char): String =
-    replaceRange(i, i + 1, "$c")
 
 /**
  * @return `null` if obstacles reach the wall
  */
-fun findObstacles(gameState: List<String>, robotX: Int, robotY: Int, vecX: Int, vecY: Int): List<Coordinate>? {
+private fun findObstacles(gameState: List<String>, robotX: Int, robotY: Int, vecX: Int, vecY: Int): List<Coordinate>? {
     var curX = robotX
     var curY = robotY
     val obstacles = mutableListOf<Coordinate>()
