@@ -1,5 +1,6 @@
 package aoc14
 
+import aoc12.Coordinate
 import java.io.File
 
 fun main() {
@@ -15,10 +16,14 @@ fun main() {
 
     println(robotPositions, width, height)
     println()
-    repeat(100) {
+    repeat(10000) { i ->
         robotPositions = robotPositions.map { it.next(width, height) }
-        println(robotPositions, width, height)
-        println()
+        if (robotPositions.distinctBy { Coordinate(it.x, it.y) }.size == robotPositions.size) {
+            println("--- AFTER ${i + 1} SECONDS ---")
+            println(robotPositions, width, height)
+            println()
+            readln()
+        }
     }
 
     println("Safety factor: ${safetyFactorOf(robotPositions, width, height)}")
