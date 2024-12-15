@@ -1,31 +1,10 @@
 package aoc15
 
 import aoc12.Coordinate
+import java.io.File
 
 fun main() {
-    val input = """
-        ##########
-        #..O..O.O#
-        #......O.#
-        #.OO..O.O#
-        #..O@..O.#
-        #O#..O...#
-        #O..O..O.#
-        #.OO.O.OO#
-        #....O...#
-        ##########
-
-        <vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
-        vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
-        ><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
-        <<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
-        ^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
-        ^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
-        >^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
-        <><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
-        ^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
-        v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
-    """.trimIndent()
+    val input = File("inputs/aoc15/input.txt").readText()
 
     var gameState = input.substringBefore("\n\n").lines()
     gameState = adaptGameForPartB(gameState)
@@ -33,6 +12,7 @@ fun main() {
 
     printGameState(gameState)
     for (move in moves) {
+        println("Applying move $move")
         gameState = advanceGameState(gameState, move)
         printGameState(gameState)
     }
@@ -110,9 +90,20 @@ fun applyForce(nextGameState: MutableList<String>, x: Int, y: Int, vecX: Int, ve
         // on x-axis, we only need to free one tile (left/right) as we're a 2x1 obstacle
         -1 -> applyForce(nextGameState, nextLeftX, nextY, vecX, vecY)
         1 -> applyForce(nextGameState, nextRightX, nextY, vecX, vecY)
-        // else we're moving on y-axis -> need to free TWO tiles
-        else -> applyForce(nextGameState, nextLeftX, nextY, vecX, vecY) &&
-                applyForce(nextGameState, nextRightX, nextY, vecX, vecY)
+        else -> {
+            // we're moving on y-axis -> need to free TWO tiles
+            // However, we must free either both tiles or none.
+            // If only one tile can be freed, we must not touch the other!
+            // Let's do a dry run first:
+            val dryRunGameState = nextGameState.toMutableList()
+            if (applyForce(dryRunGameState, nextLeftX, nextY, vecX, vecY) &&
+                applyForce(dryRunGameState, nextRightX, nextY, vecX, vecY)) {
+                nextGameState.overwriteWith(dryRunGameState)
+                true
+            } else {
+                false
+            }
+        }
     }
 
     if (appliedForceToObstacle) {
@@ -128,4 +119,9 @@ fun applyForce(nextGameState: MutableList<String>, x: Int, y: Int, vecX: Int, ve
         // One of the objects we needed to push to make space for ourselves couldn't be moved
         return false
     }
+}
+
+private fun <E> MutableList<E>.overwriteWith(other: MutableList<E>) {
+    clear()
+    this += other
 }
