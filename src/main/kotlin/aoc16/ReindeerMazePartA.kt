@@ -1,26 +1,11 @@
 package aoc16
 
 import aoc06.Direction
+import java.io.File
 import java.util.*
 
 fun main() {
-    val input = """
-        ###############
-        #.......#....E#
-        #.#.###.#.###.#
-        #.....#.#...#.#
-        #.###.#####.#.#
-        #.#.#.......#.#
-        #.#.#####.###.#
-        #...........#.#
-        ###.#.#####.#.#
-        #...#.....#.#.#
-        #.#.#.###.#.#.#
-        #.....#...#.#.#
-        #.###.#.#.#.#.#
-        #S..#.....#...#
-        ###############
-    """.trimIndent().lines()
+    val input = File("inputs/aoc16/input.txt").readLines()
 
     val height = input.size
     val width = input[0].length
@@ -92,7 +77,6 @@ fun main() {
 data class ShortestPathResult(val distances: Map<Node, Int?>, val predecessors: Map<Node, Node>)
 
 fun Graph.shortestPathFrom(start: Node): ShortestPathResult {
-    // TODO Do we need end parameter at all?
     data class NodeWithPriority(val node: Node, val priority: Int)
 
     val distances = mutableMapOf<Node, Int?>().withDefault { null }
