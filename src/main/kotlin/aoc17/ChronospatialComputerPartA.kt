@@ -1,5 +1,6 @@
 package aoc17
 
+import java.io.File
 import kotlin.math.pow
 
 const val OP_ADV = 0
@@ -12,13 +13,7 @@ const val OP_BDV = 6
 const val OP_CDV = 7
 
 fun main() {
-    val input = """
-        Register A: 729
-        Register B: 0
-        Register C: 0
-
-        Program: 0,1,5,4,3,0
-    """.trimIndent().lines()
+    val input = File("inputs/aoc17/input.txt").readLines()
 
     // CPU state
     var a = input[0].substringAfter(": ").toInt()
