@@ -11,16 +11,16 @@ const val OP_OUT = 5
 const val OP_BDV = 6
 const val OP_CDV = 7
 
-fun runComputer(startA: Int, startB: Int, startC: Int, program: List<Int>, output: (Int) -> Unit) {
+fun runComputer(startA: Long, startB: Long, startC: Long, program: IntArray, output: (Int) -> Boolean) {
     // CPU state
     var a = startA
     var b = startB
     var c = startC
     var instructionPointer = 0
 
-    fun evalComboOperand(operand: Int): Int =
+    fun evalComboOperand(operand: Int): Long =
         when (operand) {
-            0, 1, 2, 3 -> operand
+            0, 1, 2, 3 -> operand.toLong()
             4 -> a
             5 -> b
             6 -> c
@@ -32,39 +32,42 @@ fun runComputer(startA: Int, startB: Int, startC: Int, program: List<Int>, outpu
         val operand = program[instructionPointer + 1]
         when (instruction) {
             OP_ADV -> {
-                val numerator = a
-                val denominator = 2.0.pow(evalComboOperand(operand))
-                a = (numerator / denominator).toInt()
+                a = a shr evalComboOperand(operand).toIntOrThrow()
             }
+
             OP_BXL -> {
-                b = b xor operand
+                b = b xor operand.toLong()
             }
+
             OP_BST -> {
                 b = evalComboOperand(operand).rem(8)
             }
+
             OP_JNZ -> {
-                if (a != 0) {
+                if (a != 0L) {
                     instructionPointer = operand
                 } else {
                     instructionPointer += 2
                 }
             }
+
             OP_BXC -> {
                 b = b xor c
             }
+
             OP_OUT -> {
-                output(evalComboOperand(operand).rem(8))
+                val shouldContinue = output(evalComboOperand(operand).rem(8).toIntOrThrow())
+                if (!shouldContinue) return
             }
+
             OP_BDV -> {
-                val numerator = a
-                val denominator = 2.0.pow(evalComboOperand(operand))
-                b = (numerator / denominator).toInt()
+                b = a shr evalComboOperand(operand).toIntOrThrow()
             }
+
             OP_CDV -> {
-                val numerator = a
-                val denominator = 2.0.pow(evalComboOperand(operand))
-                c = (numerator / denominator).toInt()
+                c = a shr evalComboOperand(operand).toIntOrThrow()
             }
+
             else -> error("Unknown instruction $instruction")
         }
 
@@ -73,3 +76,6 @@ fun runComputer(startA: Int, startB: Int, startC: Int, program: List<Int>, outpu
         } // else we already did it in OP_JNZ handler
     }
 }
+
+fun Long.toIntOrThrow(): Int =
+    if (this in Int.MIN_VALUE..Int.MAX_VALUE) toInt() else error("$this does not fit into Int")
