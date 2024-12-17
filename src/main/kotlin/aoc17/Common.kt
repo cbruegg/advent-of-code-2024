@@ -28,6 +28,9 @@ fun runComputer(startA: Long, startB: Long, startC: Long, program: IntArray, out
         }
 
     while (instructionPointer in program.indices) {
+        check(a >= 0)
+        check(b >= 0)
+        check(c >= 0)
         val instruction = program[instructionPointer]
         val operand = program[instructionPointer + 1]
         when (instruction) {
