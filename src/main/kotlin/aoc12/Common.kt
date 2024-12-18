@@ -34,6 +34,7 @@ data class Coordinate(val x: Int, val y: Int) {
     val topNeighbor get() = Coordinate(x, y - 1)
     val rightNeighbor get() = Coordinate(x + 1, y)
     val bottomNeighbor get() = Coordinate(x, y + 1)
+    val neighbors get() = listOf(leftNeighbor, topNeighbor, rightNeighbor, bottomNeighbor)
 }
 
 data class Region(val symbol: Char, val coordinates: Set<Coordinate>) {

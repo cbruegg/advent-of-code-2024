@@ -14,14 +14,14 @@ fun main() {
     println(minDistance)
 }
 
-private data class ShortestPathResult(val distances: Map<Node, Int?>, val predecessors: Map<Node, Node>)
+data class ShortestPathResult<N>(val distances: Map<N, Int?>, val predecessors: Map<N, N>)
 
-private fun Graph.shortestPathFrom(start: Node): ShortestPathResult {
-    data class NodeWithPriority(val node: Node, val priority: Int)
+fun <N> Graph<N>.shortestPathFrom(start: N): ShortestPathResult<N> {
+    data class NodeWithPriority(val node: N, val priority: Int)
 
-    val distances = mutableMapOf<Node, Int?>().withDefault { null }
+    val distances = mutableMapOf<N, Int?>().withDefault { null }
     val queue = PriorityQueue<NodeWithPriority>(Comparator.comparingInt { it.priority })
-    val predecessors = mutableMapOf<Node, Node>()
+    val predecessors = mutableMapOf<N, N>()
 
     distances[start] = 0
     queue += NodeWithPriority(start, 0)

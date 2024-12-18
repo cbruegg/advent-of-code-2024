@@ -3,7 +3,7 @@ package aoc16
 import aoc06.Direction
 
 data class Maze(
-    val graph: Graph,
+    val graph: Graph<Node>,
     val startNode: Node,
     val endNodes: Set<Node>
 )
@@ -13,7 +13,7 @@ fun parseMaze(input: List<String>): Maze {
     val width = input[0].length
 
     val nodes = mutableSetOf<Node>()
-    val edges = mutableMapOf<Node, MutableSet<Edge>>()
+    val edges = mutableMapOf<Node, MutableSet<Edge<Node>>>()
     var startNode: Node? = null
     var endNodes: Set<Node>? = null // one per direction (all are OK destinations)
     for ((y, line) in input.withIndex()) {
@@ -83,6 +83,6 @@ data class Node(
     val direction: Direction
 )
 
-data class Graph(val nodes: Set<Node>, val edges: Map<Node, Set<Edge>>)
+data class Graph<N>(val nodes: Set<N>, val edges: Map<N, Set<Edge<N>>>)
 
-data class Edge(val weight: Int, val target: Node)
+data class Edge<N>(val weight: Int, val target: N)

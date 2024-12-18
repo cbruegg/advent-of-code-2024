@@ -29,10 +29,10 @@ fun printNodes(coordinates: Collection<Coordinate>, input: List<String>) {
     }
 }
 
-private data class ShortestPathsResult(val distances: Map<Node, Int?>, val predecessors: Map<Node, Set<Node>>) {
-    fun getAllShortestPaths(endNode: Node): List<List<Node>> {
+private data class ShortestPathsResult<N>(val distances: Map<N, Int?>, val predecessors: Map<N, Set<N>>) {
+    fun getAllShortestPaths(endNode: N): List<List<N>> {
 
-        fun collectPath(via: List<Node>): List<List<Node>> {
+        fun collectPath(via: List<N>): List<List<N>> {
             val last = via.last()
             val predecessorsOfLast = predecessors[last] ?: error("No path found")
             if (setOf(last) == predecessorsOfLast) {
@@ -50,12 +50,12 @@ private data class ShortestPathsResult(val distances: Map<Node, Int?>, val prede
     }
 }
 
-private fun Graph.shortestPathsFrom(start: Node): ShortestPathsResult {
-    data class NodeWithPriority(val node: Node, val priority: Int)
+private fun <N> Graph<N>.shortestPathsFrom(start: N): ShortestPathsResult<N> {
+    data class NodeWithPriority(val node: N, val priority: Int)
 
-    val distances = mutableMapOf<Node, Int?>().withDefault { null }
+    val distances = mutableMapOf<N, Int?>().withDefault { null }
     val queue = PriorityQueue<NodeWithPriority>(Comparator.comparingInt { it.priority })
-    val predecessors = mutableMapOf<Node, MutableSet<Node>>()
+    val predecessors = mutableMapOf<N, MutableSet<N>>()
 
     distances[start] = 0
     predecessors[start] = mutableSetOf(start) // makes the recursion in getAllShortestPaths easier
