@@ -35,7 +35,9 @@ fun <N> Graph<N>.shortestPathFrom(start: N): ShortestPathResult<N> {
     while (queue.isNotEmpty()) {
         val next = queue.remove()
         for (edge in edges.getOrDefault(next.node, emptySet())) {
-            val distanceViaNext = distances[next.node]!! + edge.weight
+            val distanceToNext = distances[next.node] ?: continue // no route!
+
+            val distanceViaNext = distanceToNext + edge.weight
             val currentDistance = distances[edge.target]
             if (currentDistance == null || distanceViaNext < currentDistance) {
                 predecessors[edge.target] = next.node
