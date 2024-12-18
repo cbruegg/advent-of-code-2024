@@ -4,36 +4,11 @@ import aoc12.Coordinate
 import aoc16.Edge
 import aoc16.Graph
 import aoc16.shortestPathFrom
+import java.io.File
 
 fun main() {
-    val input = """
-        5,4
-        4,2
-        4,5
-        3,0
-        2,1
-        6,3
-        2,4
-        1,5
-        0,6
-        3,3
-        2,6
-        5,1
-        1,2
-        5,5
-        2,5
-        6,5
-        1,4
-        0,4
-        6,4
-        1,1
-        6,1
-        1,0
-        0,5
-        1,6
-        2,0
-    """.trimIndent().lines().take(12)
-    val len = 7
+    val input = File("inputs/aoc18/input.txt").readLines().take(1024)
+    val len = 71
 
     // true = has obstacle
     val map = Array(len) { BooleanArray(len) }
@@ -52,8 +27,8 @@ fun main() {
 }
 
 fun printMap(map: Array<BooleanArray>) {
-    for ((y, line) in map.withIndex()) {
-        for ((x, hasObstacle) in line.withIndex()) {
+    for (line in map) {
+        for (hasObstacle in line) {
             print(if (hasObstacle) '#' else '.')
         }
         println()
