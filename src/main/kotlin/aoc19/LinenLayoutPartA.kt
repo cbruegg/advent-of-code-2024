@@ -1,18 +1,21 @@
 package aoc19
 
-fun main() {
-    val input = """
-        r, wr, b, g, bwu, rb, gb, br
+import java.io.File
 
-        brwrr
-        bggr
-        gbbr
-        rrbgbr
-        ubwu
-        bwurrg
-        brgr
-        bbrgwb
-    """.trimIndent().lines()
+fun main() {
+//    val input = """
+//        r, wr, b, g, bwu, rb, gb, br
+//
+//        brwrr
+//        bggr
+//        gbbr
+//        rrbgbr
+//        ubwu
+//        bwurrg
+//        brgr
+//        bbrgwb
+//    """.trimIndent().lines()
+    val input = File("inputs/aoc19/input.txt").readLines()
 
     val towels = input[0].split(", ").sortedByDescending { it.length }
     val designs = input.drop(2)
