@@ -3,7 +3,6 @@ package aoc21
 import aoc16.Edge
 import aoc16.Graph
 import aoc16.allShortestPathsFrom
-import aoc16.shortestPathFrom
 
 data class KeypadButton(val label: Char)
 

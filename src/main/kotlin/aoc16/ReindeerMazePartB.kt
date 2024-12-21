@@ -30,6 +30,8 @@ fun printNodes(coordinates: Collection<Coordinate>, input: List<String>) {
 }
 
 data class AllShortestPathsResult<N>(val distances: Map<N, Int?>, val predecessors: Map<N, Set<N>>) {
+    private val allShortestPathsByEndNode = mutableMapOf<N, List<List<N>>>()
+
     fun getAllShortestPaths(endNode: N): List<List<N>> {
 
         fun collectPath(via: List<N>): List<List<N>> {
@@ -46,7 +48,7 @@ data class AllShortestPathsResult<N>(val distances: Map<N, Int?>, val predecesso
             }
         }
 
-        return collectPath(listOf(endNode))
+        return allShortestPathsByEndNode.getOrPut(endNode) { collectPath(listOf(endNode)) }
     }
 }
 
