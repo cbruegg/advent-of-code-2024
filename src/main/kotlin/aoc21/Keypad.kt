@@ -1,5 +1,6 @@
 package aoc21
 
+import aoc16.AllShortestPathsResult
 import aoc16.Edge
 import aoc16.Graph
 import aoc16.allShortestPathsFrom
@@ -14,4 +15,28 @@ data class Keypad(
     private val buttonToShortestPathResult = graph.nodes.associateWith { graph.allShortestPathsFrom(it) }
 
     fun shortestPathsFrom(button: KeypadButton) = buttonToShortestPathResult.getValue(button)
+
+    private val keypadRoutes = mutableMapOf<Pair<KeypadButton, KeypadButton>, List<String>>()
+
+    fun keypadRoute(start: KeypadButton, target: KeypadButton): List<String> {
+        return keypadRoutes.getOrPut(start to target) {
+            shortestPathsFrom(start).keypadRouteTo(keypad = this, target = target)
+        }
+    }
+}
+
+private fun AllShortestPathsResult<KeypadButton>.keypadRouteTo(keypad: Keypad, target: KeypadButton): List<String> {
+    return getAllShortestPaths(target)
+        .map { path ->
+            val sb = StringBuilder()
+            for (i in 0..<path.lastIndex) {
+                val a = path[i]
+                val b = path[i + 1]
+                // TODO Cache
+                val edge = keypad.graph.edges[a]!!.find { it.target == b }
+                val direction = keypad.edgeToDirection[a to edge]!!
+                sb.append(direction)
+            }
+            sb.toString()
+        }
 }

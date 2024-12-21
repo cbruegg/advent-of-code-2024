@@ -53,7 +53,7 @@ fun Keypad.computeDirections(code: String, pos: KeypadButton = KeypadButton('A')
     if (code.isEmpty()) return listOf("")
 
     val next = code[0]
-    val routesToNext = shortestPathsFrom(pos).keypadRouteTo(keypad = this, target = KeypadButton(next))
+    val routesToNext = keypadRoute(pos, KeypadButton(next))
     val fullRoutes = mutableListOf<String>()
     for (routeToNext in routesToNext) {
         for (restOfRoute in computeDirections(code.substring(1), pos = KeypadButton(next))) {
@@ -62,23 +62,6 @@ fun Keypad.computeDirections(code: String, pos: KeypadButton = KeypadButton('A')
     }
 
     return fullRoutes
-}
-
-// TODO Cache?
-fun AllShortestPathsResult<KeypadButton>.keypadRouteTo(keypad: Keypad, target: KeypadButton): List<String> {
-    return getAllShortestPaths(target)
-        .map { path ->
-            val sb = StringBuilder()
-            for (i in 0..<path.lastIndex) {
-                val a = path[i]
-                val b = path[i + 1]
-                // TODO Cache
-                val edge = keypad.graph.edges[a]!!.find { it.target == b }
-                val direction = keypad.edgeToDirection[a to edge]!!
-                sb.append(direction)
-            }
-            sb.toString()
-        }
 }
 
 fun applyNumericKeypadRoute(route: String): String {
