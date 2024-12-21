@@ -1,6 +1,8 @@
 package aoc21
 
 import aoc16.AllShortestPathsResult
+import java.io.File
+import java.nio.file.Files
 
 fun main() {
     println("Test for 179A:")
@@ -10,13 +12,7 @@ fun main() {
     println(formatCode("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
     println()
 
-    val codes = """
-        029A
-        980A
-        179A
-        456A
-        379A
-    """.trimIndent().lines()
+    val codes = File("inputs/aoc21/input.txt").readLines()
     var totalComplexity = 0
     for (code in codes) {
         println(code)
