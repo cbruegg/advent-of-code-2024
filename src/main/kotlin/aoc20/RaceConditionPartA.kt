@@ -4,46 +4,72 @@ import aoc12.Coordinate
 import aoc16.Edge
 import aoc16.Graph
 import aoc16.shortestPathFrom
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 
-fun main() {
-    val input = """
-        ###############
-        #...#...#.....#
-        #.#.#.#.#.###.#
-        #S#...#.#.#...#
-        #######.#.#.###
-        #######.#.#...#
-        #######.#.###.#
-        ###..E#...#...#
-        ###.#######.###
-        #...###...#...#
-        #.#####.#.###.#
-        #.#...#.#.#...#
-        #.#.#.#.#.#.###
-        #...#...#...###
-        ###############
-    """.trimIndent().lines()
+suspend fun main() {
+    val input = File("inputs/aoc20/input.txt").readLines()
+//    val input = """
+//        ###############
+//        #...#...#.....#
+//        #.#.#.#.#.###.#
+//        #S#...#.#.#...#
+//        #######.#.#.###
+//        #######.#.#...#
+//        #######.#.###.#
+//        ###..E#...#...#
+//        ###.#######.###
+//        #...###...#...#
+//        #.#####.#.###.#
+//        #.#...#.#.#...#
+//        #.#.#.#.#.#.###
+//        #...#...#...###
+//        ###############
+//    """.trimIndent().lines()
 
     val (parsed, cheats) = parseInput(input)
     val lengthWithoutCheats = parsed.graph.shortestPathFrom(parsed.start).distances[parsed.end] ?: error("No route!")
     val cheatsByTimeSave = mutableMapOf<Int, MutableSet<Cheat>>()
-    for (cheat in cheats) {
-        val (sourceNode, edge) = cheat
-        val edgesWithCheat = parsed.graph.edges.toMutableMap().apply {
-            this[sourceNode] = (this[sourceNode] ?: emptySet()) + edge
-        }
-        val updatedGraph = parsed.graph.copy(edges = edgesWithCheat)
-        val lengthWithCheat = updatedGraph.shortestPathFrom(parsed.start).distances[parsed.end]
-            ?: error("No route with cheat should not happen!")
 
-        val timeSave = lengthWithoutCheats - lengthWithCheat
-        cheatsByTimeSave.getOrPut(timeSave, { mutableSetOf() }) += cheat
+    coroutineScope {
+        val processedCheats = AtomicInteger(0)
+        cheats
+            .map { cheat ->
+                async {
+                    val (sourceNode, edge) = cheat
+                    val edgesWithCheat = parsed.graph.edges.toMutableMap().apply {
+                        this[sourceNode] = (this[sourceNode] ?: emptySet()) + edge
+                    }
+                    val updatedGraph = parsed.graph.copy(edges = edgesWithCheat)
+                    val lengthWithCheat = updatedGraph.shortestPathFrom(parsed.start).distances[parsed.end]
+                        ?: error("No route with cheat should not happen!")
+
+                    val processed = processedCheats.incrementAndGet()
+                    println("Processed ${processed + 1} of ${cheats.size} cheats")
+
+                    val timeSave = lengthWithoutCheats - lengthWithCheat
+                    Pair(timeSave, cheat)
+                }
+            }
+            .awaitAll()
+            .forEach { (timeSave, cheat) ->
+                cheatsByTimeSave.getOrPut(timeSave, { mutableSetOf() }) += cheat
+            }
     }
 
     cheatsByTimeSave.entries
         .sortedByDescending { (timeSave, _) -> timeSave }
-        .forEach { (timeSave, cheats) -> println("Saves $timeSave: ${cheats.size} cheat(s) ($cheats)") }
+        .forEach { (timeSave, cheats) -> println("Saves $timeSave: ${cheats.size} cheat(s)") }
+
+    val cheatsThatSaveAtLeast100 = cheatsByTimeSave.entries
+        .filter { (timeSave, _) -> timeSave >= 100 }
+        .sumOf { (_, cheats) -> cheats.size }
+
+    println("cheatsThatSaveAtLeast100=$cheatsThatSaveAtLeast100")
 }
 
 data class Node(val x: Int, val y: Int, val isWall: Boolean) {
