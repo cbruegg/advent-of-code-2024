@@ -1,87 +1,187 @@
 package aoc21
 
-import aoc16.Edge
-import aoc16.Graph
-import aoc16.ShortestPathResult
-import aoc16.shortestPathFrom
+import aoc16.AllShortestPathsResult
 
 fun main() {
-    val directions = computeDirectionsForNumericKeypad("029A")
-    println(directions)
-}
+    println("Test for 179A:")
+    println(formatCode(applyNumericKeypadRoute(applyDirectionalKeypadRoute(applyDirectionalKeypadRoute("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))))
+    println(formatCode(applyDirectionalKeypadRoute(applyDirectionalKeypadRoute("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))))
+    println(formatCode(applyDirectionalKeypadRoute("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))
+    println(formatCode("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
+    println()
 
-data class NumericKeypadButton(val label: Char)
+    val codes = """
+        029A
+        980A
+        179A
+        456A
+        379A
+    """.trimIndent().lines()
+    var totalComplexity = 0
+    for (code in codes) {
+        println(code)
+        var shortestDirectionalKeypad2Directions: String? = null
+        for (numericKeypadDirections in numericKeypad.computeDirections(code)) {
+//            println(formatCode(numericKeypadDirections))
+            validateNumericKeypadRoute(numericKeypadDirections, code)
 
-data class NumericKeypad(
-    val graph: Graph<NumericKeypadButton>,
-    val edgeToDirection: MutableMap<Pair<NumericKeypadButton, Edge<NumericKeypadButton>>, Char>
-) {
-    // Precompute to save resources later
-    private val buttonToShortestPathResult = graph.nodes.associateWith { graph.shortestPathFrom(it) }
+            for (directionalKeypad1Directions in directionalKeypad.computeDirections(numericKeypadDirections)) {
+//                println(formatCode(directionalKeypad1Directions))
+                validateDirectionalKeypadRoute(directionalKeypad1Directions, numericKeypadDirections)
 
-    fun shortestPathsFrom(button: NumericKeypadButton) = buttonToShortestPathResult.getValue(button)
-}
+                for (directionalKeypad2Directions in directionalKeypad.computeDirections(directionalKeypad1Directions)) {
+                    if (shortestDirectionalKeypad2Directions == null || shortestDirectionalKeypad2Directions.length > directionalKeypad2Directions.length) {
+                        shortestDirectionalKeypad2Directions = directionalKeypad2Directions
+                    }
+//                    println(formatCode(directionalKeypad2Directions))
+                    validateDirectionalKeypadRoute(directionalKeypad2Directions, directionalKeypad1Directions)
+                }
+            }
+        }
 
-val numericKeypad: NumericKeypad = run {
-    val edgeToDirection = mutableMapOf<Pair<NumericKeypadButton, Edge<NumericKeypadButton>>, Char>()
+        check(shortestDirectionalKeypad2Directions != null) { "No route found" }
 
-    fun edge(source: NumericKeypadButton, target: NumericKeypadButton, direction: Char): Edge<NumericKeypadButton> {
-        val edge = Edge(weight = 1, target = target)
-        edgeToDirection[source to edge] = direction
-        return edge
+        val length = shortestDirectionalKeypad2Directions.length
+        val numericPart = Regex("""0*(\d*)A?""").matchEntire(code)!!.groupValues[1].toInt()
+        println("length = $length, numericPart = $numericPart")
+        val complexity = length * numericPart
+        println("complexity = $complexity")
+        totalComplexity += complexity
+        println()
     }
 
-    val k7 = NumericKeypadButton('7')
-    val k8 = NumericKeypadButton('8')
-    val k9 = NumericKeypadButton('9')
-    val k4 = NumericKeypadButton('4')
-    val k5 = NumericKeypadButton('5')
-    val k6 = NumericKeypadButton('6')
-    val k1 = NumericKeypadButton('1')
-    val k2 = NumericKeypadButton('2')
-    val k3 = NumericKeypadButton('3')
-    val k0 = NumericKeypadButton('0')
-    val ka = NumericKeypadButton('A')
-    val numericKeypadGraph = Graph(
-        nodes = setOf(k7, k8, k9, k4, k5, k6, k1, k2, k3, k0, ka),
-        edges = mapOf(
-            k7 to setOf(edge(k7, k8, '>'), edge(k7, k4, 'v')),
-            k4 to setOf(edge(k4, k5, '>'), edge(k4, k1, 'v'), edge(k4, k7, '^')),
-            k1 to setOf(edge(k1, k2, '>'), edge(k1, k4, '^')),
-            k8 to setOf(edge(k8, k9, '>'), edge(k8, k5, 'v'), edge(k8, k7, '<')),
-            k5 to setOf(edge(k5, k6, '>'), edge(k5, k2, 'v'), edge(k5, k4, '<'), edge(k5, k8, '^')),
-            k2 to setOf(edge(k2, k3, '>'), edge(k2, k0, 'v'), edge(k2, k1, '<'), edge(k2, k5, '^')),
-            k0 to setOf(edge(k0, ka, '>'), edge(k0, k2, '^')),
-            k9 to setOf(edge(k9, k6, 'v'), edge(k9, k8, '<')),
-            k6 to setOf(edge(k6, k3, 'v'), edge(k6, k5, '<'), edge(k6, k9, '^')),
-            k3 to setOf(edge(k3, ka, 'v'), edge(k3, k2, '<'), edge(k3, k6, '^')),
-            ka to setOf(edge(ka, k0, '<'), edge(ka, k3, '^')),
-        )
+    println("totalComplexity = $totalComplexity")
+}
+
+fun Keypad.computeDirections(code: String, pos: KeypadButton = KeypadButton('A')): List<String> {
+    if (code.isEmpty()) return listOf("")
+
+    val next = code[0]
+    val routesToNext = shortestPathsFrom(pos).keypadRouteTo(keypad = this, target = KeypadButton(next))
+    val fullRoutes = mutableListOf<String>()
+    for (routeToNext in routesToNext) {
+        for (restOfRoute in computeDirections(code.substring(1), pos = KeypadButton(next))) {
+            fullRoutes += routeToNext + 'A' + restOfRoute
+        }
+    }
+
+    return fullRoutes
+}
+
+// TODO Cache?
+fun AllShortestPathsResult<KeypadButton>.keypadRouteTo(keypad: Keypad, target: KeypadButton): List<String> {
+    return getAllShortestPaths(target)
+        .map { path ->
+            val sb = StringBuilder()
+            for (i in 0..<path.lastIndex) {
+                val a = path[i]
+                val b = path[i + 1]
+                // TODO Cache
+                val edge = keypad.graph.edges[a]!!.find { it.target == b }
+                val direction = keypad.edgeToDirection[a to edge]!!
+                sb.append(direction)
+            }
+            sb.toString()
+        }
+}
+
+fun applyNumericKeypadRoute(route: String): String {
+    val keypad = arrayOf(
+        arrayOf('7', '8', '9'),
+        arrayOf('4', '5', '6'),
+        arrayOf('1', '2', '3'),
+        arrayOf(' ', '0', 'A'),
     )
-
-    NumericKeypad(numericKeypadGraph, edgeToDirection)
-}
-
-fun computeDirectionsForNumericKeypad(code: String): String {
-    var pos = NumericKeypadButton('A')
-    val route = StringBuilder()
-    for (next in code) {
-        val routeToNext = numericKeypad.shortestPathsFrom(pos).keypadRouteTo(NumericKeypadButton(next))
-        route.append(routeToNext)
-        route.append('A') // push the button
-        pos = NumericKeypadButton(next)
+    val sb = StringBuilder()
+    validateKeypadRoute(keypadLayout = keypad, startX = 2, startY = 3, route = route) { i, button ->
+        sb.append(button)
     }
-    return route.toString()
+    return sb.toString()
 }
 
-fun ShortestPathResult<NumericKeypadButton>.keypadRouteTo(target: NumericKeypadButton): String {
-    val reverseRoute = StringBuilder()
-    var cur = target
-    while (true) {
-        val predecessor = predecessors[cur] ?: break
-        val edgePredecessorToCur = Edge(weight = 1, cur)
-        reverseRoute.append(numericKeypad.edgeToDirection.getValue(predecessor to edgePredecessorToCur))
-        cur = predecessor
+fun applyDirectionalKeypadRoute(route: String): String {
+    val keypad = arrayOf(
+        arrayOf(' ', '^', 'A'),
+        arrayOf('<', 'v', '>'),
+    )
+    val sb = StringBuilder()
+    validateKeypadRoute(keypadLayout = keypad, startX = 2, startY = 0, route = route) { i, button ->
+        sb.append(button)
     }
-    return reverseRoute.reversed().toString()
+    return sb.toString()
 }
+
+fun validateNumericKeypadRoute(route: String, code: String) {
+    val keypad = arrayOf(
+        arrayOf('7', '8', '9'),
+        arrayOf('4', '5', '6'),
+        arrayOf('1', '2', '3'),
+        arrayOf(' ', '0', 'A'),
+    )
+    validateKeypadRoute(keypadLayout = keypad, startX = 2, startY = 3, route = route) { i, button ->
+        check(code[i] == button) {
+            "Route $route is invalid for code $code at i=$i. Expected ${code[i]}, but pressed $button"
+        }
+    }
+}
+
+fun validateDirectionalKeypadRoute(route: String, code: String) {
+    val keypad = arrayOf(
+        arrayOf(' ', '^', 'A'),
+        arrayOf('<', 'v', '>'),
+    )
+    validateKeypadRoute(keypadLayout = keypad, startX = 2, startY = 0, route = route) { i, button ->
+        check(code[i] == button) {
+            "Route $route is invalid for code $code at i=$i. Expected ${code[i]}, but pressed $button"
+        }
+    }
+}
+
+fun validateKeypadRoute(
+    keypadLayout: Array<Array<Char>>,
+    startX: Int,
+    startY: Int,
+    route: String,
+    validator: (index: Int, button: Char) -> Unit
+) {
+    var x = startX
+    var y = startY
+    var i = 0
+
+    fun checkBounds(action: Char, x: Int, y: Int) {
+        check(y in keypadLayout.indices) { "Ran action '$action', but moved out of bounds at ($x, $y) [y]" }
+        check(x in keypadLayout[y].indices) { "Ran action '$action', but moved out of bounds at ($x, $y) [x]" }
+    }
+
+    for (action in route) {
+        when (action) {
+            '>' -> {
+                x++
+                checkBounds(action, x, y)
+            }
+
+            '<' -> {
+                x--
+                checkBounds(action, x, y)
+            }
+
+            '^' -> {
+                y--
+                checkBounds(action, x, y)
+            }
+
+            'v' -> {
+                y++
+                checkBounds(action, x, y)
+            }
+
+            'A' -> {
+                val button = keypadLayout[y][x]
+                validator(i, button)
+                i++
+            }
+        }
+    }
+}
+
+fun formatCode(code: String) = code.replace("A", "A ")

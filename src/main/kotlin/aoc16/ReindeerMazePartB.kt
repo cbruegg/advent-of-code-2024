@@ -9,7 +9,7 @@ fun main() {
 
     val (graph, startNode, endNodes) = parseMaze(input)
 
-    val shortestPathsResult = graph.shortestPathsFrom(startNode)
+    val shortestPathsResult = graph.allShortestPathsFrom(startNode)
     val shortestPaths = endNodes.flatMap { shortestPathsResult.getAllShortestPaths(it) }
     val nodesOnShortestPaths = shortestPaths.flatten().map { Coordinate(it.x, it.y) }.distinct()
     printNodes(nodesOnShortestPaths, input)
@@ -29,7 +29,7 @@ fun printNodes(coordinates: Collection<Coordinate>, input: List<String>) {
     }
 }
 
-private data class ShortestPathsResult<N>(val distances: Map<N, Int?>, val predecessors: Map<N, Set<N>>) {
+data class AllShortestPathsResult<N>(val distances: Map<N, Int?>, val predecessors: Map<N, Set<N>>) {
     fun getAllShortestPaths(endNode: N): List<List<N>> {
 
         fun collectPath(via: List<N>): List<List<N>> {
@@ -50,7 +50,7 @@ private data class ShortestPathsResult<N>(val distances: Map<N, Int?>, val prede
     }
 }
 
-private fun <N> Graph<N>.shortestPathsFrom(start: N): ShortestPathsResult<N> {
+fun <N> Graph<N>.allShortestPathsFrom(start: N): AllShortestPathsResult<N> {
     data class NodeWithPriority(val node: N, val priority: Int)
 
     val distances = mutableMapOf<N, Int?>().withDefault { null }
@@ -87,5 +87,5 @@ private fun <N> Graph<N>.shortestPathsFrom(start: N): ShortestPathsResult<N> {
         }
     }
 
-    return ShortestPathsResult(distances, predecessors)
+    return AllShortestPathsResult(distances, predecessors)
 }
