@@ -12,30 +12,27 @@ fun main() {
     println(formatCode("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
     println()
 
+    val chain = listOf(
+        { code: String -> numericKeypad.computeDirections(code) },
+        { code: String -> directionalKeypad.computeDirections(code) },
+        { code: String -> directionalKeypad.computeDirections(code) },
+    )
+
     val codes = File("inputs/aoc21/input.txt").readLines()
     var totalComplexity = 0
     for (code in codes) {
         println(code)
-        var shortestDirectionalKeypad2Directions: String? = null
-        for (numericKeypadDirections in numericKeypad.computeDirections(code)) {
-//            println(formatCode(numericKeypadDirections))
-            validateNumericKeypadRoute(numericKeypadDirections, code)
 
-            for (directionalKeypad1Directions in directionalKeypad.computeDirections(numericKeypadDirections)) {
-//                println(formatCode(directionalKeypad1Directions))
-                validateDirectionalKeypadRoute(directionalKeypad1Directions, numericKeypadDirections)
-
-                for (directionalKeypad2Directions in directionalKeypad.computeDirections(directionalKeypad1Directions)) {
-                    if (shortestDirectionalKeypad2Directions == null || shortestDirectionalKeypad2Directions.length > directionalKeypad2Directions.length) {
-                        shortestDirectionalKeypad2Directions = directionalKeypad2Directions
-                    }
-//                    println(formatCode(directionalKeypad2Directions))
-                    validateDirectionalKeypadRoute(directionalKeypad2Directions, directionalKeypad1Directions)
-                }
+        var codeInputs = listOf(code)
+        for (function in chain) {
+            val newCodeInputs = mutableListOf<String>()
+            for (codeInput in codeInputs) {
+                newCodeInputs += function(codeInput)
             }
+            codeInputs = newCodeInputs
         }
 
-        check(shortestDirectionalKeypad2Directions != null) { "No route found" }
+        val shortestDirectionalKeypad2Directions = codeInputs.minBy { it.length }
 
         val length = shortestDirectionalKeypad2Directions.length
         val numericPart = Regex("""0*(\d*)A?""").matchEntire(code)!!.groupValues[1].toInt()
