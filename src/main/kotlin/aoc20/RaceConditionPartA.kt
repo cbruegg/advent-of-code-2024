@@ -8,6 +8,9 @@ import kotlinx.coroutines.coroutineScope
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
+typealias Cheat = Pair<Node, Edge<Node>>
+typealias CheatingEdges = Set<Cheat>
+
 suspend fun main() {
     val input = File("inputs/aoc20/input.txt").readLines()
 //    val input = """

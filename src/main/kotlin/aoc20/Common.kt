@@ -17,7 +17,8 @@ data class Input(
     val end: Node,
     val width: Int,
     val height: Int,
-    val nodeByCoordinate: Map<Coordinate, Node>
+    val nodeByCoordinate: Map<Coordinate, Node>,
+    val graphWithCheatingEdges: Graph<Node>
 )
 
 fun parseInput(map: List<String>): Input {
@@ -25,6 +26,7 @@ fun parseInput(map: List<String>): Input {
     var end: Node? = null
     val nodes = mutableSetOf<Node>()
     val edges = mutableMapOf<Node, MutableSet<Edge<Node>>>()
+    val allEdges = mutableMapOf<Node, MutableSet<Edge<Node>>>()
     for ((y, line) in map.withIndex()) {
         for ((x, char) in line.withIndex()) {
             val hasWall = char == '#'
@@ -33,32 +35,31 @@ fun parseInput(map: List<String>): Input {
             if (char == 'S') start = node
             if (char == 'E') end = node
 
-            if (!hasWall) {
-                node.coordinate.neighbors.forEach { neighbor ->
-                    if (neighbor.y in map.indices && neighbor.x in map[y].indices) {
-                        val neighborIsWall = map[neighbor.y][neighbor.x] == '#'
-                        if (!neighborIsWall) {
-                            val neighborNode = Node(neighbor.x, neighbor.y, neighborIsWall)
-                            edges.computeIfAbsent(node, { mutableSetOf() }) += Edge(weight = 1, target = neighborNode)
-                            edges.computeIfAbsent(neighborNode, { mutableSetOf() }) += Edge(weight = 1, target = node)
-                        }
+            node.coordinate.neighbors.forEach { neighbor ->
+                if (neighbor.y in map.indices && neighbor.x in map[y].indices) {
+                    val neighborIsWall = map[neighbor.y][neighbor.x] == '#'
+                    val neighborNode = Node(neighbor.x, neighbor.y, neighborIsWall)
+                    if (!hasWall && !neighborIsWall) {
+                        edges.computeIfAbsent(node, { mutableSetOf() }) +=
+                            Edge(weight = 1, target = neighborNode)
+                        edges.computeIfAbsent(neighborNode, { mutableSetOf() }) +=
+                            Edge(weight = 1, target = node)
                     }
+                    allEdges.computeIfAbsent(node, { mutableSetOf() }) +=
+                        Edge(weight = 1, target = neighborNode)
+                    allEdges.computeIfAbsent(neighborNode, { mutableSetOf() }) +=
+                        Edge(weight = 1, target = node)
                 }
             }
         }
     }
     return Input(
-        Graph(
-            nodes,
-            edges
-        ),
+        Graph(nodes, edges),
         start ?: error("No start found"),
         end ?: error("No end found"),
         width = map[0].length,
         height = map.size,
-        nodeByCoordinate = nodes.associateBy { it.coordinate }
+        nodeByCoordinate = nodes.associateBy { it.coordinate },
+        graphWithCheatingEdges = Graph(nodes, allEdges)
     )
 }
-
-typealias Cheat = Pair<Node, Edge<Node>>
-typealias CheatingEdges = Set<Cheat>
