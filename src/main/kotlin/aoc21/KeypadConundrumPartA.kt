@@ -1,10 +1,32 @@
 package aoc21
 
-import aoc16.AllShortestPathsResult
 import java.io.File
-import java.nio.file.Files
+import kotlin.math.min
 
 fun main() {
+    // TODO Precompute all combos? I guess no need, cause we're already caching
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 0))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 1))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 2))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 3))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 10))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 15))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 18))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 20))
+    println(directionalKeypad.keypadRoutes3(KeypadButton('A'), KeypadButton('^'), levels = 25))
+
+    println(directionalKeypad.keypadRoutes2(KeypadButton('A'), KeypadButton('^'), levels = 0))
+    println(directionalKeypad.keypadRoutes2(KeypadButton('A'), KeypadButton('^'), levels = 1))
+    println(directionalKeypad.keypadRoutes2(KeypadButton('A'), KeypadButton('^'), levels = 2))
+    println(directionalKeypad.keypadRoutes2(KeypadButton('A'), KeypadButton('^'), levels = 3))
+//    println(directionalKeypad.keypadRoutes2(KeypadButton('A'), KeypadButton('^'), levels = 10))
+
+    println(directionalKeypad.keypadRoutes(KeypadButton('A'), KeypadButton('^'), levels = 0))
+    println(directionalKeypad.keypadRoutes(KeypadButton('A'), KeypadButton('^'), levels = 1))
+    println(directionalKeypad.keypadRoutes(KeypadButton('A'), KeypadButton('^'), levels = 2))
+//    println(directionalKeypad.keypadRoutes(KeypadButton('A'), KeypadButton('^'), levels = 3))
+//    println(directionalKeypad.keypadRoutes(KeypadButton('A'), KeypadButton('^'), levels = 10))
+
     println("Test for 179A:")
     println(formatCode(applyNumericKeypadRoute(applyDirectionalKeypadRoute(applyDirectionalKeypadRoute("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")))))
     println(formatCode(applyDirectionalKeypadRoute(applyDirectionalKeypadRoute("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))))
@@ -23,6 +45,32 @@ fun main() {
     for (code in codes) {
         println(code)
 
+        val allDirections = numericKeypad.computeDirections(code)
+        var minRoute = Int.MAX_VALUE
+        var minRouteStr: String? = null
+        for (rawDirections in allDirections) {
+            val directions = "A$rawDirections"
+            var routeLen = 0
+            var route = ""
+            for (i in  0..<directions.lastIndex) {
+                val a = directions[i]
+                val b = directions[i + 1]
+                val lenAToB = directionalKeypad.keypadRoutes3(KeypadButton(a), KeypadButton(b), levels = 1)
+                routeLen += lenAToB
+                // TODO correct?
+//                routeLen += directionalKeypad.keypadRoutes3(KeypadButton(b), KeypadButton('A'), levels = 0)
+//                routeLen += 1 // Press A
+
+                route += directionalKeypad.keypadRoutes(KeypadButton(a), KeypadButton(b), levels = 1).minBy { it.length }
+//                route += directionalKeypad.keypadRoutes(KeypadButton(b), KeypadButton('A'), levels = 1).minBy { it.length }
+//                route += 'A'
+            }
+            minRoute = min(minRoute, routeLen)
+            minRouteStr = if (minRouteStr == null || minRouteStr.length > route.length) route else minRouteStr
+        }
+        println("minRoute=$minRoute")
+        println("minRouteStr=$minRouteStr")
+
         var codeInputs = listOf(code)
         for (function in chain) {
             val newCodeInputs = mutableListOf<String>()
@@ -30,6 +78,7 @@ fun main() {
                 newCodeInputs += function(codeInput)
             }
             codeInputs = newCodeInputs
+//            println("codeInputs=$codeInputs")
         }
 
         val shortestDirectionalKeypad2Directions = codeInputs.minBy { it.length }
