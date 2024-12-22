@@ -9,21 +9,7 @@ import kotlin.math.max
 import kotlin.math.pow
 
 suspend fun main() {
-//    val input = """
-//        2021
-//        5017
-//        19751
-//    """.trimIndent().lines().map { it.toLong() }
     val input = File("inputs/aoc22/input.txt").readLines().map { it.toLong() }
-
-//    withPrng(seed = 1, includeSeed = true, length = 6) {
-//        println(it)
-//        true
-//    }
-//    forEachDigitDiffSequence(seed = 1, includeSeed = true, length = 6) { digit, diff ->
-//        println("$digit $diff")
-//        true
-//    }
 
     val numberOfCombinations = (-9..9).count().toDouble().pow(4).toInt()
     println("numberOfCombinations=$numberOfCombinations")
@@ -58,16 +44,10 @@ suspend fun main() {
                 }
             }
             if (priceAtSale != -1) {
-//                println("Buyer with seed=$buyerSeed buys at priceAtSale=$priceAtSale")
                 revenue += priceAtSale
-            } else {
-//                println("Buyer with seed=$buyerSeed does not buy")
             }
         }
         maxRevenue.updateAndGet { prev -> max(prev, revenue) }
-//        if (revenue == 23) {
-//            println(targetSequence.toArray().contentToString())
-//        }
     }
     println("maxRevenue=$maxRevenue")
 }
