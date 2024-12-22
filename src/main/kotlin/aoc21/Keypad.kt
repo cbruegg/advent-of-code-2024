@@ -26,8 +26,7 @@ data class Keypad(
 
     val cache = mutableMapOf<Triple<KeypadButton, KeypadButton, Int>, Int>()
 
-    // TODO Fix all names (variables, functions, ...)
-    fun keypadRoutes3(start: KeypadButton, target: KeypadButton, levels: Int): Int {
+    fun shortestKeypadRoute(start: KeypadButton, target: KeypadButton, levels: Int): Int {
         val thisLevel = keypadRoute(start, target).map { it + 'A' }
         if (levels == 0) return thisLevel[0].length // sorted by length already
 
@@ -38,18 +37,18 @@ data class Keypad(
         var nextLevel = Int.MAX_VALUE
         for (rawRoute in thisLevel) {
             val route = "A$rawRoute"
-            var partialRoutes = listOf(0)
+            var routeHeads = listOf(0)
             for (i in 0..<route.lastIndex) {
                 val a = route[i]
                 val b = route[i + 1]
-                val subroutes = keypadRoutes3(KeypadButton(a), KeypadButton(b), levels - 1)
-                val newPartialRoutes = mutableListOf<Int>()
-                for (partialRoute in partialRoutes) {
-                    newPartialRoutes += partialRoute + subroutes
+                val tail = shortestKeypadRoute(KeypadButton(a), KeypadButton(b), levels - 1)
+                val newRouteHeads = mutableListOf<Int>()
+                for (routeHead in routeHeads) {
+                    newRouteHeads += routeHead + tail
                 }
-                partialRoutes = newPartialRoutes
+                routeHeads = newRouteHeads
             }
-            nextLevel = min(nextLevel, partialRoutes.min())
+            nextLevel = min(nextLevel, routeHeads.min())
         }
 
         cache[cacheKey] = nextLevel
@@ -57,35 +56,7 @@ data class Keypad(
         return nextLevel
     }
 
-    fun keypadRoutes2(start: KeypadButton, target: KeypadButton, levels: Int): List<Int> {
-        val thisLevel = keypadRoute(start, target)
-        if (levels == 0) return thisLevel.map { it.length }
-
-        val nextLevel = mutableListOf<Int>()
-        for (rawRoute in thisLevel) {
-            val route = "A$rawRoute"
-            var partialRoutes = listOf(0)
-            for (i in 0..<route.lastIndex) {
-                val a = route[i]
-                val b = route[i + 1]
-                val subroutes = keypadRoutes2(KeypadButton(a), KeypadButton(b), levels - 1)
-                val newPartialRoutes = mutableListOf<Int>()
-                for (partialRoute in partialRoutes) {
-                    for (subroute in subroutes) {
-                        newPartialRoutes += partialRoute + subroute
-                    }
-                }
-                partialRoutes = newPartialRoutes
-            }
-            nextLevel += partialRoutes
-        }
-
-        return nextLevel
-    }
-
-    private fun String.surroundCharsWith(char: Char) = replace(Regex("."), "$char$0$char")
-
-    fun keypadRoutes(start: KeypadButton, target: KeypadButton, levels: Int): List<String> {
+    fun allKeypadRoutes(start: KeypadButton, target: KeypadButton, levels: Int): List<String> {
         val thisLevel = keypadRoute(start, target).map { it + 'A' }
         if (levels == 0) return thisLevel
 
@@ -93,20 +64,20 @@ data class Keypad(
         for (rawRoute in thisLevel) {
 //            val route = rawRoute.surroundCharsWith('A')
             val route = "A$rawRoute"
-            var partialRoutes = listOf("")
+            var routeHeads = listOf("")
             for (i in 0..<route.lastIndex) {
                 val a = route[i]
                 val b = route[i + 1]
-                val subroutes = keypadRoutes(KeypadButton(a), KeypadButton(b), levels - 1)
-                val newPartialRoutes = mutableListOf<String>()
-                for (partialRoute in partialRoutes) {
-                    for (subroute in subroutes) {
-                        newPartialRoutes += partialRoute + subroute
+                val tails = allKeypadRoutes(KeypadButton(a), KeypadButton(b), levels - 1)
+                val newRouteHeads = mutableListOf<String>()
+                for (routeHead in routeHeads) {
+                    for (tail in tails) {
+                        newRouteHeads += routeHead + tail
                     }
                 }
-                partialRoutes = newPartialRoutes
+                routeHeads = newRouteHeads
             }
-            nextLevel += partialRoutes
+            nextLevel += routeHeads
         }
 
         return nextLevel
