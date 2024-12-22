@@ -15,13 +15,3 @@ fun main() {
     println(sumOf2000thSecret)
 }
 
-fun prng(seed: Long): Sequence<Long> = sequence {
-    var cur = seed
-    while (true) {
-        cur = ((cur * 64) xor cur).rem(16777216)
-        cur = ((cur / 32) xor cur).rem(16777216)
-        cur = ((cur * 2048) xor cur).rem(16777216)
-        yield(cur)
-    }
-}
-
