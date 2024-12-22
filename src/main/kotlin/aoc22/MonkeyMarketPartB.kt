@@ -1,42 +1,60 @@
 package aoc22
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
+import kotlin.math.pow
 
-fun main() {
-    val input = """
-        1
-        2
-        3
-        2024
-    """.trimIndent().lines().map { it.toLong() }
-//    val input = File("inputs/aoc22/input.txt").readLines().map { it.toLong() }
+suspend fun main() {
+//    val input = """
+//        2021
+//        5017
+//        19751
+//    """.trimIndent().lines().map { it.toLong() }
+    val input = File("inputs/aoc22/input.txt").readLines().map { it.toLong() }
 
-    val numberOfCombinations = generate4Tuples().count()
+//    withPrng(seed = 1, includeSeed = true, length = 6) {
+//        println(it)
+//        true
+//    }
+//    forEachDigitDiffSequence(seed = 1, includeSeed = true, length = 6) { digit, diff ->
+//        println("$digit $diff")
+//        true
+//    }
+
+    val numberOfCombinations = (-9..9).count().toDouble().pow(4).toInt()
     println("numberOfCombinations=$numberOfCombinations")
 
-    // TODO Parallelization
     // Nice test value: sequenceOf(intArrayOf(-2, 1, -1, 3))
-    var maxRevenue = -1
-    var lastProgress = -1
-    for ((idx, wantedPriceChanges) in generate4Tuples().withIndex()) {
+    val maxRevenue = AtomicInteger(-1)
+    val lastProgress = AtomicInteger(-1)
+    forEach4Tuple { idx, d0, d1, d2, d3 ->
+        var targetSequence = LastFourDiffs()
+        targetSequence = targetSequence.push(d0)
+        targetSequence = targetSequence.push(d1)
+        targetSequence = targetSequence.push(d2)
+        targetSequence = targetSequence.push(d3)
+
         val progressPct = (idx.toDouble() * 100 / numberOfCombinations).toInt()
-        if (lastProgress < progressPct) {
+        if (lastProgress.getAndSet(progressPct) < progressPct) {
             println("$progressPct %")
-            lastProgress = progressPct
         }
 
         var revenue = 0
         for (buyerSeed in input) {
-            val digitsAndDiffs = prng(seed = buyerSeed, includeSeed = true)
-                .take(2000)
-                .toDigitDiffSequence()
-            var lastFourDiffs = intArrayOf()
+            var lastFourDiffs = LastFourDiffs()
             var priceAtSale = -1
-            for ((digit, diff) in digitsAndDiffs) {
-                lastFourDiffs = lastFourDiffs.push(diff, maxSize = 4)
-                if (wantedPriceChanges.contentEquals(lastFourDiffs)) {
+            var seenDiffs = 0
+            forEachDigitDiffSequence(buyerSeed, includeSeed = true, length = 2001 /* 2000 plus seed */) { digit, diff ->
+                lastFourDiffs = lastFourDiffs.push(diff)
+                if (++seenDiffs >= 4 && lastFourDiffs == targetSequence) {
                     priceAtSale = digit
-                    break
+                    false
+                } else {
+                    true
                 }
             }
             if (priceAtSale != -1) {
@@ -46,47 +64,71 @@ fun main() {
 //                println("Buyer with seed=$buyerSeed does not buy")
             }
         }
-        maxRevenue = max(maxRevenue, revenue)
+        maxRevenue.updateAndGet { prev -> max(prev, revenue) }
+//        if (revenue == 23) {
+//            println(targetSequence.toArray().contentToString())
+//        }
     }
     println("maxRevenue=$maxRevenue")
 }
 
-fun IntArray.push(element: Int, maxSize: Int): IntArray =
-    if (size + 1 < maxSize) {
-        copyOf(size + 1).also { it[it.lastIndex] = element }
-    } else {
-        val next = IntArray(maxSize)
-        copyInto(next, startIndex = 1)
-        next[maxSize - 1] = element
-        next
+@JvmInline
+value class LastFourDiffs(private val storage: Int = 0) {
+    // We need 5 bits to store range 0..18.
+    // 4 values of 5 bits fit into 20 bits, so Int32 as storage is fine.
+
+    fun push(diff: Int): LastFourDiffs {
+        val unsignedDiff = diff + 9 // map range -9..9 to 0..18 to avoid sign bit
+
+        return LastFourDiffs(
+            ((storage shl 5) or unsignedDiff) and 0b00000000000011111111111111111111
+        )
     }
 
-fun generate4Tuples(): Sequence<IntArray> = sequence {
-    for (d1 in -9..9) {
-        for (d2 in -9..9) {
-            for (d3 in -9..9) {
-                for (d4 in -9..9) {
-                    yield(intArrayOf(d1, d2, d3, d4))
+    fun toArray() = intArrayOf(
+        ((storage shr 15) and 0b11111) - 9,
+        ((storage shr 10) and 0b11111) - 9,
+        ((storage shr 5) and 0b11111) - 9,
+        ((storage shr 0) and 0b11111) - 9,
+    )
+}
+
+suspend fun forEach4Tuple(block: (index: Int, d0: Int, d1: Int, d2: Int, d3: Int) -> Unit) = coroutineScope {
+    val i = AtomicInteger(0)
+    for (d0 in -9..9) {
+        (-9..9).map { d1 ->
+            launch {
+                for (d2 in -9..9) {
+                    for (d3 in -9..9) {
+                        block(i.incrementAndGet(), d0, d1, d2, d3)
+                    }
                 }
             }
-        }
+        }.joinAll()
     }
 }
 
-data class DigitAndDiff(val digit: Int, val diff: Int)
-
-fun Sequence<Long>.toDigitDiffSequence(): Sequence<DigitAndDiff> = sequence {
+fun forEachDigitDiffSequence(
+    seed: Long,
+    includeSeed: Boolean,
+    length: Int,
+    block: (digit: Int, diff: Int) -> Boolean
+) {
     var gotFirst = false
     var prev = 0
-    for (secret in this@toDigitDiffSequence) {
+    withPrng(seed, includeSeed, length) { secret ->
         val digit = (secret % 10).toInt()
         if (gotFirst) {
-            yield(DigitAndDiff(digit, digit - prev))
+            if (!block(digit, digit - prev)) {
+                // Allow breaking out of the loop
+                return@withPrng false
+            }
             prev = digit
         } else {
             prev = digit
             gotFirst = true
         }
+        true
     }
 }
 
