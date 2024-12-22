@@ -24,25 +24,25 @@ data class Keypad(
         }
     }
 
-    val cache = mutableMapOf<Triple<KeypadButton, KeypadButton, Int>, Int>()
+    val cache = mutableMapOf<Triple<KeypadButton, KeypadButton, Int>, Long>()
 
-    fun shortestKeypadRoute(start: KeypadButton, target: KeypadButton, levels: Int): Int {
+    fun shortestKeypadRoute(start: KeypadButton, target: KeypadButton, levels: Int): Long {
         val thisLevel = keypadRoute(start, target).map { it + 'A' }
-        if (levels == 0) return thisLevel[0].length // sorted by length already
+        if (levels == 0) return thisLevel[0].length.toLong() // sorted by length already
 
         val cacheKey = Triple(start, target, levels)
         val cached = cache[cacheKey]
         if (cached != null) return cached
 
-        var nextLevel = Int.MAX_VALUE
+        var nextLevel = Long.MAX_VALUE
         for (rawRoute in thisLevel) {
             val route = "A$rawRoute"
-            var routeHeads = listOf(0)
+            var routeHeads = listOf(0L)
             for (i in 0..<route.lastIndex) {
                 val a = route[i]
                 val b = route[i + 1]
                 val tail = shortestKeypadRoute(KeypadButton(a), KeypadButton(b), levels - 1)
-                val newRouteHeads = mutableListOf<Int>()
+                val newRouteHeads = mutableListOf<Long>()
                 for (routeHead in routeHeads) {
                     newRouteHeads += routeHead + tail
                 }

@@ -18,7 +18,7 @@ fun main() {
             for (i in  0..<directions.lastIndex) {
                 val a = directions[i]
                 val b = directions[i + 1]
-                val lenAToB = directionalKeypad.shortestKeypadRoute(KeypadButton(a), KeypadButton(b), levels = 1)
+                val lenAToB = directionalKeypad.shortestKeypadRoute(KeypadButton(a), KeypadButton(b), levels = 25 - 1)
                 routeLen += lenAToB
             }
             length = min(length, routeLen)
