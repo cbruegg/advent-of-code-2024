@@ -1,40 +1,9 @@
 package aoc23
 
+import java.io.File
+
 fun main() {
-    val input = """
-        kh-tc
-        qp-kh
-        de-cg
-        ka-co
-        yn-aq
-        qp-ub
-        cg-tb
-        vc-aq
-        tb-ka
-        wh-tc
-        yn-cg
-        kh-ub
-        ta-co
-        de-co
-        tc-td
-        tb-wq
-        wh-td
-        ta-ka
-        td-qp
-        aq-cg
-        wq-ub
-        ub-vc
-        de-ta
-        wq-aq
-        wq-vc
-        wh-yn
-        ka-de
-        kh-ta
-        co-tc
-        wh-qp
-        tb-vc
-        td-yn
-    """.trimIndent().lines()
+    val input = File("inputs/aoc23/input.txt").readLines()
 
     val pcsToNeighbors = input
         .asSequence()
@@ -58,4 +27,5 @@ fun main() {
     for (clique in cliquesOf3.sortedBy { it.joinToString(separator = "") }) {
         println(clique)
     }
+    println(cliquesOf3.size)
 }
