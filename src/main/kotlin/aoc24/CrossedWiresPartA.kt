@@ -2,7 +2,7 @@ package aoc24
 
 import java.io.File
 
-fun main() {
+suspend fun main() {
     val input = File("inputs/aoc24/input.txt").readText()
 
     val (initialValuesStr, gatesStr) = input.split("\n\n")

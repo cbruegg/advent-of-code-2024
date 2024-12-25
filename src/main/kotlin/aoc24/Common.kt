@@ -1,5 +1,7 @@
 package aoc24
 
+import kotlinx.coroutines.yield
+
 enum class GateType { AND, XOR, OR }
 
 data class Gate(val inputA: String, val inputB: String, val output: String, val type: GateType)
@@ -14,7 +16,7 @@ fun GateType.evaluate(inputA: Int, inputB: Int): Int =
         GateType.OR -> inputA or inputB
     }
 
-fun runCircuit(wireToInitialValue: Map<String, Int>, gates: Collection<Gate>): Map<String, Int> {
+suspend fun runCircuit(wireToInitialValue: Map<String, Int>, gates: Collection<Gate>): Map<String, Int> {
     val wireToAffectedGates = mutableMapOf<String, MutableSet<Gate>>()
     for (gate in gates) {
         wireToAffectedGates.getOrPut(gate.inputA, { mutableSetOf() }) += gate
@@ -34,6 +36,7 @@ fun runCircuit(wireToInitialValue: Map<String, Int>, gates: Collection<Gate>): M
             val a = wireToValue[affectedGate.inputA] ?: continue // wait for missing value
             val b = wireToValue[affectedGate.inputB] ?: continue // wait for missing value
             valueProcessingQueue += affectedGate.output to affectedGate.type.evaluate(a, b)
+            yield()
         }
     }
 
