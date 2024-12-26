@@ -4,6 +4,8 @@ import aoc16.Edge
 import aoc16.Graph
 import java.io.File
 
+// This file validates the circuit by verifying its layout
+
 fun main() {
 //    val input = """
 //        x00: 0
